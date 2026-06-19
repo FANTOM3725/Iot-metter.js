@@ -16,7 +16,7 @@ export interface DeviceState {
     updatedAt: Date
 }
 
-export interface DeviceLogs {
+export interface DeviceLog {
     id: number;
     deviceId: number;
     command: string;

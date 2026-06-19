@@ -86,4 +86,37 @@ describe('Device tests', () => {
         expect(response.status).toBe(200)
         expect(response.body.mode).toBe('music')
     })
+
+    it('should return device logs', async () => {
+        const response = await request(app)
+            .get('/api/devices/1/logs')
+
+        expect(response.status).toBe(200)
+        expect(response.body).toHaveProperty('logs')
+        expect(Array.isArray(response.body.logs)).toBe(true)
+        expect(response.body.logs.length).toBeGreaterThan(0)
+        expect(response.body.logs[0]).toHaveProperty('deviceId')
+        expect(response.body.logs[0]).toHaveProperty('command')
+        expect(response.body.logs[0]).toHaveProperty('status')
+    });
+
+    it('should return 400 for invalid brightness', async () => {
+        const response = await request(app)
+            .patch('/api/devices/1/brightness')
+            .send({
+                brightness: 200
+            })
+
+        expect(response.status).toBe(400)
+    })
+
+    it('should return 400 for invalid mode', async () => {
+        const response = await request(app)
+            .patch('/api/devices/1/mode')
+            .send({
+                mode: 'disco'
+            })
+
+        expect(response.status).toBe(400)
+    })
 })

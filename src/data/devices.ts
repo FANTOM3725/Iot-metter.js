@@ -1,4 +1,4 @@
-import {Device, DeviceState} from "../types/device";
+import {Device, DeviceLog, DeviceState} from "../types/device";
 
 export const devices: Device[] = [
     {
@@ -22,3 +22,4 @@ export const deviceStates: DeviceState[] = [
         updatedAt: new Date()
     }
 ];
+export const deviceLogs: DeviceLog[] = []

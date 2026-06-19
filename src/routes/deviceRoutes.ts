@@ -7,12 +7,13 @@ import {
     updateMode,
     turnOnDevice,
     turnOffDevice,
-    getDeviceState
+    getDeviceState, getDeviceLogs
 } from "../controllers/deviceControllers";
 const router = Router()
 
 router.get("/", getDevices)
 router.get('/:id', getDeviceById)
+router.get('/:id/logs', getDeviceLogs)
 router.get('/:id/state', getDeviceState)
 router.patch("/:id/brightness", updateBrightness)
 router.patch('/:id/color', updateColor)
