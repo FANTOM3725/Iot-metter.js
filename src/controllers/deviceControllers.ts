@@ -1,17 +1,20 @@
 import {DeviceState, DeviceParams, Device, DeviceLog, UpdateColorBody, UpdateModeBody, UpdateBrightnessBody} from "../types/device";
 import {Request, Response} from "express";
 import {devices, deviceStates, deviceLogs} from "../data/devices";
+import {MockDeviceAdapter} from "../adapters/mockDeviceAdapter";
+const deviceAdapter = new MockDeviceAdapter()
 
 export const getDevices = (req: Request, res: Response)=> {
+    const devices = deviceAdapter.getDevices()
     return res.status(200).json({
         message: "Devices retrieved successfully",
-        devices: devices
+        devices
     })
 }
 
 export const getDeviceById = (req: Request<DeviceParams>, res: Response) => {
     const id = Number(req.params.id)
-    const device = devices.find((device) => device.id === id)
+    const device = deviceAdapter.getDeviceById(id)
 
     if (!device) {
         return res.status(404).json({
@@ -35,7 +38,7 @@ export const updateBrightness = (
         return res.status(400).json({ message: 'Яркость должна быть в диапазоне 0-100'})
     }
 
-    const device = devices.find((device) => device.id === id)
+    const device = deviceAdapter.getDeviceById(id)
 
     if (!device) {
         return res.status(404).json({
@@ -43,7 +46,7 @@ export const updateBrightness = (
         })
     }
 
-    const deviceState = deviceStates.find((state) => state.deviceId === device.id)
+    const deviceState = deviceAdapter.setBrightness(id, brightness)
 
     if (!deviceState) {
         return res.status(404).json({
@@ -51,8 +54,6 @@ export const updateBrightness = (
         })
     }
 
-    deviceState.brightness = brightness
-    deviceState.updatedAt = new Date()
     const log: DeviceLog = {
         id: deviceLogs.length + 1,
         deviceId: id,
@@ -77,7 +78,7 @@ export const updateBrightness = (
          return res.status(400).json({ message: 'режим может быть normal или music'})
      }
 
-     const device = devices.find((device) => device.id === id)
+     const device = deviceAdapter.getDeviceById(id)
 
      if (!device) {
          return res.status(404).json({
@@ -85,16 +86,13 @@ export const updateBrightness = (
          })
      }
 
-     const deviceState = deviceStates.find((state) => state.deviceId === device.id)
+     const deviceState = deviceAdapter.setMode(id, mode)
 
      if (!deviceState) {
          return res.status(404).json({
              message: "Состояние устройства не найдено"
          })
      }
-
-     deviceState.mode = mode
-     deviceState.updatedAt = new Date()
 
      const log: DeviceLog = {
          id: deviceLogs.length + 1,
@@ -118,11 +116,8 @@ export const updateBrightness = (
      res: Response)=> {
      const id = Number(req.params.id)
       const color = req.body.color
-     // if( !== 'normal' &&  !== 'music'){
-     //     return res.status(400).json({ message: 'режим может быть normal или mode'})
-     // }
 
-     const device = devices.find((device) => device.id === id)
+     const device = deviceAdapter.getDeviceById(id)
 
      if (!device) {
          return res.status(404).json({
@@ -130,16 +125,13 @@ export const updateBrightness = (
          })
      }
 
-     const deviceState = deviceStates.find((state) => state.deviceId === device.id)
+     const deviceState = deviceAdapter.setColor(id, color)
 
      if (!deviceState) {
          return res.status(404).json({
              message: "Состояние устройства не найдено"
          })
      }
-
-     deviceState.color = color
-     deviceState.updatedAt = new Date()
 
      const log: DeviceLog = {
          id: deviceLogs.length + 1,
@@ -162,22 +154,20 @@ export const updateBrightness = (
      res: Response)=> {
      const id = Number(req.params.id)
 
-     const device = devices.find((device) => device.id === id)
-
+     const device = deviceAdapter.getDeviceById(id)
      if (!device) {
          return res.status(404).json({
              message: "Устройство не найдено"
          })
      }
 
-     const deviceState = deviceStates.find((state) => state.deviceId === device.id)
+     const deviceState = deviceAdapter.turnOn(id)
      if (!deviceState) {
          return res.status(404).json({
              message: "Состояние устройства не найдено"
          })
      }
-     deviceState.isOn = true
-     deviceState.updatedAt = new Date()
+
      const log: DeviceLog = {
          id: deviceLogs.length + 1,
          deviceId: id,
@@ -197,7 +187,7 @@ export const turnOffDevice = (
     res: Response)=> {
     const id = Number(req.params.id)
 
-    const device = devices.find((device) => device.id === id)
+    const device = deviceAdapter.getDeviceById(id)
 
     if (!device) {
         return res.status(404).json({
@@ -205,15 +195,14 @@ export const turnOffDevice = (
         })
     }
 
-    const deviceState = deviceStates.find((state) => state.deviceId === device.id)
+    const deviceState = deviceAdapter.turnOff(id)
 
     if (!deviceState) {
         return res.status(404).json({
             message: "Состояние устройства не найдено"
         })
     }
-    deviceState.isOn = false
-    deviceState.updatedAt = new Date()
+
     const log: DeviceLog = {
         id: deviceLogs.length + 1,
         deviceId: id,
@@ -234,7 +223,7 @@ export const getDeviceState = (
     res: Response) => {
     const id = Number(req.params.id)
 
-    const device = devices.find((device) => device.id === id)
+    const device = deviceAdapter.getDeviceById(id)
 
     if (!device) {
         return res.status(404).json({
@@ -242,7 +231,7 @@ export const getDeviceState = (
         })
     }
 
-    const deviceState = deviceStates.find((state) => state.deviceId === device.id)
+    const deviceState = deviceAdapter.getDeviceState(id)
 
     if (!deviceState) {
         return res.status(404).json({
